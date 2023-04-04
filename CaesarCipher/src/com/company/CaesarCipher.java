@@ -14,6 +14,21 @@ public class CaesarCipher{
         }
         return cipherText;
     }
+     public static String decrypt(String cipherText,int shiftKey){
+        cipherText = cipherText.toLowerCase();
+        String plainText="";
+        for(int i=0;i<cipherText.length();i++){
+            int charPosition = ALPHABET.indexOf(cipherText.charAt(i));
+            int ogvalue = (charPosition-shiftKey)%26;
+            if(ogvalue<0){
+                ogvalue= ALPHABET.length()+ ogvalue;
+            }
+            char replaceVal = ALPHABET.charAt(ogvalue);
+            plainText += replaceVal;
+        }
+        return plainText;
+    }
+
 
 
     public static void main(String[] args){
@@ -22,6 +37,7 @@ public class CaesarCipher{
         String message= new String();
         message= sc.next();
         System.out.println(encrypt(message,3));
+        System.out.println(decrypt(encrypt(message,3),3));
         sc.close();
     }
 
