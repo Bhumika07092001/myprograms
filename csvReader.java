@@ -1,5 +1,5 @@
 public class csvReader {
-    import java.io.;
+import java.io.;
 import java.util.Scanner;
     public class ReadCSVExample1
     {
