@@ -59,3 +59,4 @@ class StockData {
 
     // Getters and setters omitted for brevity
 }
+
