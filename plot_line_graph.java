@@ -4,7 +4,7 @@
         import org.jfree.data.time.*;
         import org.jfree.data.xy.*;
 
-public class ChartExample {
+public class Chart {
     public static void main(String[] args) throws IOException {
         // Step 1: Import the necessary libraries
         // java.io.* for reading CSV file
