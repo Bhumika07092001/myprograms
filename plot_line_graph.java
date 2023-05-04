@@ -36,5 +36,38 @@ public class Chart {
             }
             movingAverage[i] = sum / windowSize;
         }
+            
+        // Step 6: Create TimeSeriesCollection object
+        TimeSeriesCollection dataset = new TimeSeriesCollection();
+        
+        // Step 7: Add TimeSeries objects to TimeSeriesCollection
+        TimeSeries avgSeries = new TimeSeries("Moving Average");
+        TimeSeries volSeries = new TimeSeries("Volume");
+        for (i = windowSize; i < prices.length; i++) {
+            // Add data to moving average TimeSeries
+            RegularTimePeriod time = new Millisecond(new java.util.Date());
+            double price = movingAverage[i - windowSize];
+            avgSeries.add(time, price);
+            
+            // Add data to volume TimeSeries
+            time = new Millisecond(new java.util.Date());
+            double volume = volumes[i];
+            volSeries.add(time, volume);
+        }
+        dataset.addSeries(avgSeries);
+        dataset.addSeries(volSeries);
+        
+        // Step 8: Create line chart
+        JFreeChart chart = ChartFactory.createTimeSeriesChart(
+            "Moving Average and Volume",
+            "Time",
+            "Price",
+            dataset,
+            true,
+            true,
+            false
+        );
+        
+        // Step 9: Set chart properties
 
 
