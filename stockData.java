@@ -1,16 +1,16 @@
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-    class StockDataReader {
+class StockDataReader {
         public static void main(String[] args) {
             String csvFile = "src\\StockDataBANKBARODA_1.csv";
             List<StockData> data = new ArrayList<>();
             try {
+
                 CSVReader reader = new CSVReader(new FileReader(csvFile));
                 String[] header = reader.readNext(); // Read header row
                 String[] row;
@@ -24,24 +24,11 @@ import java.util.List;
                 e.printStackTrace();
             }
 
-            // Analyze the stock market data as needed
-            // For example, calculate the average closing price for AAPL over the past year
-//            double sum = 0;
-//            int count = 0;
-//            for (StockData stock : data) {
-//                if (stock.getSymbol().equals("AAPL") && stock.getDate().startsWith("2022")) {
-//                    sum += stock.getClosePrice();
-//                    count++;
-//                }
-//            }
-//            double avg = sum / count;
-//            System.out.println("Average closing price for AAPL in 2022: " + avg);
-
-
-            // Filter the stock market data to only show rows where the closing price is >= 180
+//             Analyze the stock market data as needed
+             //for example Filter the stock market data to only show rows where the closing price is >= 180
             List<StockData> filteredData = new ArrayList<StockData>();
             for (StockData stock : data) {
-                if (stock.getClosePrice() < 150) {
+                if (stock.getClosePrice() < 180) {
                     filteredData.add(stock);
                 }
             }
@@ -50,10 +37,6 @@ import java.util.List;
             for (StockData stock : filteredData) {
                 System.out.println(stock);
             }
-
-
-
-
         }
     }
 
@@ -62,6 +45,8 @@ import java.util.List;
         private double openPrice;
         private double closePrice;
         private double highPrice;
+        private String lowPrice;
+        private String volume;
 
         public StockData(String symbol, String date, double openPrice, double closePrice, double highPrice, double lowPrice, long volume) {
             this.symbol = symbol;
@@ -76,7 +61,7 @@ import java.util.List;
 
 
         public String getDate() {
-            return null;
+            return symbol;
         }
 
         public double getClosePrice() {
@@ -84,7 +69,8 @@ import java.util.List;
         }
 
 
-        // Getters and setters omitted for brevity
+        public String toString() {
+            return "Symbol: " + symbol + ", Date: "  + ", Open Price: " + openPrice + ", Close Price: " + closePrice + ", High Price: " + highPrice + ", Low Price: " + lowPrice + ", Volume: " + volume;
+        }
+
     }
-
-
