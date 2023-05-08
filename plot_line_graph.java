@@ -1,73 +1,107 @@
+import java.awt.Color;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartFrame;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.time.Day;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 
-        import java.io.*;
-        import org.jfree.chart.*;
-        import org.jfree.data.time.*;
-        import org.jfree.data.xy.*;
 
-public class Chart {
-    public static void main(String[] args) throws IOException {
-        // Step 1: Import the necessary libraries
-        // java.io.* for reading CSV file
-        // org.jfree.chart.* for creating line chart
-        BufferedReader br = new BufferedReader(new FileReader("data.csv"));
-        String line = "";
 
-        // Step 3: Create arrays to store data
-        double[] prices = new double[1000];
-        double[] volumes = new double[1000];
 
-        // Step 4: Loop through each line of CSV file and parse data
-        int i = 0;
-        while ((line = br.readLine()) != null) {
-            String[] values = line.split(",");
-            prices[i] = Double.parseDouble(values[0]);
-            volumes[i] = Double.parseDouble(values[1]);
-            i++;
-        }
-        br.close();
 
-        // Step 5: Calculate moving average
-        int windowSize = 20;
-        double[] movingAverage = new double[prices.length - windowSize];
-        for (i = 0; i < movingAverage.length; i++) {
-            double sum = 0;
-            for (int j = 0; j < windowSize; j++) {
-                sum += prices[i + j];
+    public class LineChart {
+
+        public static void main(String[] args) throws IOException, CsvValidationException {
+            String csvFile = "src\\StockDataBANKBARODA_1.csv";
+            CSVReader csvReader = new CSVReader(new FileReader(csvFile));
+
+            List<Double> closingPrices = new ArrayList<>();
+            List<Double> volumes = new ArrayList<>();
+            List<Day> dates = new ArrayList<>();
+
+            String[] header = csvReader.readNext(); // Read the header row
+
+            int dateIndex = -1;
+            int closeIndex = -1;
+            int volumeIndex = -1;
+
+            // Find the indices of the "Date", "Close" and "Volume" columns
+            for (int i = 0; i < header.length; i++) {
+                if (header[i].equals("Date")) {
+                    dateIndex = i;
+                } else if (header[i].equals("Close")) {
+                    closeIndex = i;
+                } else if (header[i].equals("Volume")) {
+                    volumeIndex = i;
+                }
             }
-            movingAverage[i] = sum / windowSize;
-        }
-            
-        // Step 6: Create TimeSeriesCollection object
-        TimeSeriesCollection dataset = new TimeSeriesCollection();
-        
-        // Step 7: Add TimeSeries objects to TimeSeriesCollection
-        TimeSeries avgSeries = new TimeSeries("Moving Average");
-        TimeSeries volSeries = new TimeSeries("Volume");
-        for (i = windowSize; i < prices.length; i++) {
-            // Add data to moving average TimeSeries
-            RegularTimePeriod time = new Millisecond(new java.util.Date());
-            double price = movingAverage[i - windowSize];
-            avgSeries.add(time, price);
-            
-            // Add data to volume TimeSeries
-            time = new Millisecond(new java.util.Date());
-            double volume = volumes[i];
-            volSeries.add(time, volume);
-        }
-        dataset.addSeries(avgSeries);
-        dataset.addSeries(volSeries);
-        
-        // Step 8: Create line chart
-        JFreeChart chart = ChartFactory.createTimeSeriesChart(
-            "Moving Average and Volume",
-            "Time",
-            "Price",
-            dataset,
-            true,
-            true,
-            false
-        );
-        
-        // Step 9: Set chart properties
+
+            if (dateIndex == -1 || closeIndex == -1 || volumeIndex == -1) {
+                throw new IllegalArgumentException("The CSV file does not contain the required columns.");
+            }
+
+            String[] line;
+
+            while ((line = csvReader.readNext()) != null) {
+                double closingPrice = Double.parseDouble(line[closeIndex]);
+                double volume = Double.parseDouble(line[volumeIndex]);
+                String dateStr = line[dateIndex];
+
+                // Parse the date string to a Day object using JFreeChart's Day class
+                String[] dateParts = dateStr.split("-");
+                Day date = new Day(Integer.parseInt(dateParts[2]), Integer.parseInt(dateParts[1]), Integer.parseInt(dateParts[0]));
+
+                closingPrices.add(closingPrice);
+                volumes.add(volume);
+                dates.add(date);
+            }
+
+            csvReader.close();
+
+            // Create a TimeSeriesCollection containing the closing prices and volumes
+            TimeSeriesCollection dataset = new TimeSeriesCollection();
+            TimeSeries closingPriceSeries = new TimeSeries("Closing Prices");
+            TimeSeries volumeSeries = new TimeSeries("Volumes");
+
+            for (int i = 0; i < closingPrices.size(); i++) {
+                closingPriceSeries.addOrUpdate(dates.get(i), closingPrices.get(i));
+                volumeSeries.addOrUpdate(dates.get(i), volumes.get(i));
+                if (i >= 49) {
+                    double[] closingPriceArray = closingPrices.subList(i - 49, i + 1).stream().mapToDouble(Double::doubleValue).toArray();
+                    double movingAverage = Moving}
+
+            }
+
+            dataset.addSeries(closingPriceSeries);
+            dataset.addSeries(volumeSeries);
+
+            // Create the chart using JFreeChart's ChartFactory
+            JFreeChart chart = ChartFactory.createTimeSeriesChart(
+                    "Closing Prices and Volumes",
+                    "Date",
+                    "Closing Price",
+                    dataset,
+                    true,
+                    true,
+                    false
+            );
+            ChartFrame frame = new ChartFrame("Closing Prices and Volumes", chart);
+            frame.pack();
+            frame.setVisible(true);
+
+            // Customize the chart
+            XYPlot plot = (XYPlot) chart.getPlot();
+            plot.setBackgroundPaint(Color.white);
+            plot.setDomainGridlinePaint(Color.lightGray);
+            plot.setRangeGridlinePaint(Color.lightGray);
 
 
+        }}
