@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>User Chat Interface</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #64c07e;
+            }
+    
+            h1 {
+                color: #333;
+                text-align: center;
+            }
+    
+            #chat-messages {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #fff;
+                border: 1px solid #ccc;
+                padding: 10px;
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+    
+            #chat-messages p {
+                background-color: #f0f0f0;
+                padding: 8px;
+                margin: 8px 0;
+                border-radius: 5px;
+            }
+    
+            #message-form {
+                max-width: 600px;
+                margin: 0 auto;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-color: #fff;
+                border: 1px solid #ccc;
+                padding: 10px;
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+    
+            #message-input {
+                flex: 1;
+                padding: 8px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                outline: none;
+            }
+    
+            #message-input::placeholder {
+                color: #999;
+            }
+    
+            #message-form button {
+                padding: 8px 16px;
+                margin-left: 10px;
+                background-color: #007bff;
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+    
+            #message-form button:hover {
+                background-color: #0056b3;
+            }
+        </style>
+    </head>
+<body >
+    
+        <h1 class="bg-teal-800">{{room.name}}</h1>
+        <div id="chat-messages">
+            {% for message in messages %}
+            <p>{{ message.content }}</p>
+            {% endfor %}
+        </div>
+        <form id="message-form">
+            <input type="hidden" id="chatroom-input" value="{{ room.slug }}">
+            <input type="text" id="message-input" placeholder="Type your message here">
+            <button type="submit">Send</button>
+        </form>
+
+    <script>
+        function fetchMessages() {
+            fetch('/get_messages/')
+                .then(response => response.json())
+                .then(data => {
+                    const chatMessages = document.getElementById('chat-messages');
+                    chatMessages.innerHTML = '';
+                    data.forEach(message => {
+                        chatMessages.innerHTML += `<p>${message.content}</p>`;
+                    });
+                })
+                .catch(error => console.error('Error fetching messages:', error));
+        }
+
+        
+    function sendMessage(message) {
+        fetch('/send_message/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({ content: message }),
+        })
+        .then(response => {
+            if (response.ok) {
+                fetchMessages();
+            } else {
+                console.error('Failed to send message:', response.statusText);
+            }
+        })
+        .catch(error => console.error('Error sending message:', error));
+    }
+
+        // Function to get the CSRF token from the browser's cookies
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        // Fetch initial messages when the page loads
+        fetchMessages();
+
+        // Set up event listener for the message form submission
+        document.getElementById('message-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value.trim();
+            if (message) {
+                sendMessage(message);
+                messageInput.value = '';
+            }
+        });
+
+        // Poll for new messages every 3 seconds
+        setInterval(fetchMessages, 15000);
+    </script>
+</body>
+</html>
